@@ -1,13 +1,13 @@
-#P3 OpenStreetMap 数据整理及探索——hawli
+# P3 OpenStreetMap 数据整理及探索——hawli
 
 ## 1.选择地图
 
-###数据来源如下：
+### 数据来源如下：
 
 - [openstreetmap地址](https://www.openstreetmap.org)
 - [选取上海区域下载](https://mapzen.com/data/metro-extracts/metro/shanghai_china/)
 
-###地图描述及选择理由：
+### 地图描述及选择理由：
 该地图为上海地区，地处长江入海口，是长江经济带的龙头城市，隔东中国海与日本九州岛相望，南濒杭州湾，北、西与江苏、浙江两省相接。
 
 上海是我曾经工作的区域之一，也是考虑定居的城市之一，之前在那里半年并没有对这个城市有深入的了解，希望通过这次整理能有进一步的了解。
