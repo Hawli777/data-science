@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v4.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+ 
+  <script type="text/javascript">
+
+  function draw(data) {
+
+    var svg = dimple.newSvg("body", 600, 500);
+    //create svg
+
+      
+    var chart = new dimple.chart(svg, data);
+    //draw the main chart
+    chart.setBounds(60, 50, 500, 400)
+    var x = chart.addCategoryAxis("x", "year");
+    x.timePeriod = d3.timeYears;
+
+    x.addOrderRule(["2009","2010","2011","2012","2013","2014"]);
+
+    var y = chart.addMeasureAxis("y", "LoanOriginalAmount");
+    var z = chart.addMeasureAxis("z", "BorrowerRate");
+    z.overrideMax = 1;
+
+    x.title='year';
+    y.title='LoanOriginalAmount';
+
+    var s = chart.addSeries("ProsperRating", dimple.plot.bubble);
+    s.aggregate = dimple.aggregateMethod.avg;
+    s.addOrderRule(["AA","A","B","C","D","E","HR"]);
+    chart.addLegend(180, 10, 360, 20);
+
+    var frame = 2000;
+    var firstTick = true;
+
+    // draw a chart without autoplaying the storyboard
+    var story = chart.setStoryboard("ProsperRating");
+    story.frameDuration = frame;
+    story.addOrderRule(["AA","A","B","C","D","E","HR"]);
+    
+    chart.draw();//draw the chart
+
+    
+
+    }
+
+  </script>
+  <h1><font size = '5'>贷款金额，贷款利率及信用评级</font></h1>
+  <p><font size = '1'>随着年限增长，贷款金额逐渐上升 <br>信用等级越高，贷款利率越低<br>信用等级越高，贷款金额越高</font></p>
+
+
+</head>
+</div>
+
+<body>
+  <script type="text/javascript">
+
+  d3.csv("prosper.csv",function(d){
+    return{
+      year:d.year,
+      BorrowerRate: +d.BorrowerRate,
+      LoanOriginalAmount: +d.LoanOriginalAmount,
+      ProsperRating: d.ProsperRating
+    };
+  },draw);
+       
+  
+
+  </script>
+
+</body> 
+
+<style>
+  body {
+    text-align: center;
+    color: black;
+    background-color: #EDEDED;
+    font-family: sans-serif;
+    font-size: "10px";
+  }
+
+</style>
+
+</html>
