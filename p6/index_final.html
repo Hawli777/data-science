@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v4.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.3.0.min.js"></script>
+ 
+  <script type="text/javascript">
+
+  function draw(data) {
+
+  var aggregatedData = dimple._rollUp(data, ["year", "BorrowerRate", "ProsperRating"], ["LoanOriginalAmount"]);
+  // This will generate a new array of data where year, BorrowerRate and ProsperRating are the same as the original
+  // data but LoanOriginalAmount will contain an array of all values.
+  for (var i = 0; i < aggregatedData.length; i += 1) {
+    // Get the array of sales for the ith year, BorrowerRate and ProsperRating combination
+    var vals = aggregatedData[i]["LoanOriginalAmount"];
+    // Sort them in ascending numerical order
+    vals.sort(function (a, b) { return parseFloat(a) - parseFloat(b) });
+    if (vals.length === 1) {
+      // If there is a single value use it for the new median column
+      aggregatedData[i]["Median LoanOriginalAmount"] = parseFloat(vals[0]);
+    } else if (vals.length % 2 === 0) {
+      // If there are an even number of values average the middle two (zero based array)
+      aggregatedData[i]["Median LoanOriginalAmount"] = (parseFloat(vals[vals.length / 2 - 1]) + parseFloat(vals[vals.length / 2])) / 2;
+    } else {
+      // Otherwise just return the middle value (zero based array)
+      aggregatedData[i]["Median LoanOriginalAmount"] = parseFloat(vals[vals.length / 2 - 0.5]);
+    }
+  }
+
+    var svg = dimple.newSvg("body", 590, 400);
+    //create svg
+
+      
+    var chart = new dimple.chart(svg, aggregatedData);
+    //draw the main chart
+    chart.setBounds(60, 30, 420, 330)
+    var x = chart.addCategoryAxis("x", "year");
+    x.timePeriod = d3.timeYears;
+
+    x.addOrderRule(["2009","2010","2011","2012","2013","2014"]);
+
+    var y = chart.addMeasureAxis("y", "Median LoanOriginalAmount");
+    var z = chart.addMeasureAxis("z", "BorrowerRate");
+
+    y.tickFormat = ",.0f";
+    z.tickFormat = ",.2f";
+
+
+    z.overrideMax = 1;
+    
+
+    x.title='贷款年份';
+    y.title='人均贷款金额';
+
+    var s = chart.addSeries("ProsperRating", dimple.plot.bubble);
+    s.aggregate = dimple.aggregateMethod.avg;
+
+    
+    s.addOrderRule(["AA","A","B","C","D","E","HR"]);
+    var myLegend = chart.addLegend(480, 140, 70, 300,"Right");
+    
+    chart.draw();//draw the chart
+
+
+
+chart.legends = [];
+    svg.selectAll("title_text")
+          .data(["信用评级：","(点击以下等级","可筛选对比)"])
+          .enter()
+          .append("text")
+            .attr("x", 499)
+            .attr("y", function (d, i) { return 90 + i * 14; })
+            .style("font-family", "sans-serif")
+            .style("font-size", "10px")
+            .style("color", "Black")
+            .text(function (d) { return d; });
+
+    // Get a unique list of Owner values to use when filtering
+    var filterValues = dimple.getUniqueValues(aggregatedData, "ProsperRating");
+    // Get all the rectangles from our now orphaned legend
+    myLegend.shapes.selectAll("rect")
+    // Add a click event to each rectangle
+      .on("click", function (e) {
+            // This indicates whether the item is already visible or not
+        var hide = false;
+        var newFilters = [];
+    // If the filters contain the clicked shape hide it
+        filterValues.forEach(function (f) {
+          if (f === e.aggField.slice(-1)[0]) {
+            hide = true;
+          } else {
+            newFilters.push(f);
+          }
+        });
+    // Hide the shape or show it
+        if (hide) {
+          d3.select(this).style("opacity", 0.2);
+          } else {
+          newFilters.push(e.aggField.slice(-1)[0]);
+          d3.select(this).style("opacity", 0.8);
+        }
+    // Update the filters
+        filterValues = newFilters;
+    // Filter the data
+        chart.data = dimple.filterData(aggregatedData, "ProsperRating", filterValues);
+    // Passing a duration parameter makes the chart animate. Without
+    // it there is no transition
+    chart.draw();
+    });
+
+    }
+
+  </script>
+  <h1><font size = '5'>个人信用贷款的金额和利率与信用评分的关系</font></h1>
+  <p><font size = '1'>2009～2014年间，prosper的人均贷款金额中位数呈上升趋势，
+  贷款金额中位数范围从最低1769$上升到14828$，在2012年人均贷款中位数约14828$；
+   <br>prosper的信用评分中，AA为最高级，HR为最低级；<br>信用等级越高的人，获得高额贷款的可能性越大，直到2014年，只要等级不低于C，基本上都能获得10000$以上贷款；<br>气泡越小贷款利率越低，从图中可看出，信用等级越高的人，贷款利率相应会比较低。
+   </font></p>
+
+
+</head>
+</div>
+
+<body>
+  <script type="text/javascript">
+
+  d3.csv("prosper.csv",function(d){
+    return{
+      year:d.year,
+      BorrowerRate: +d.BorrowerRate,
+      LoanOriginalAmount: +d.LoanOriginalAmount,
+      ProsperRating: d.ProsperRating
+    };
+  },draw);
+       
+  
+
+  </script>
+
+</body> 
+
+<style>
+  body {
+    text-align: center;
+    color: black;
+    background-color: #EDEDED;
+    font-family: sans-serif;
+    font-size: "10px";
+  }
+
+</style>
+
+</html>
