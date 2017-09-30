@@ -10,23 +10,18 @@
   <script type="text/javascript">
 
   function draw(data) {
-
+// This will generate a new array of data where year, BorrowerRate and ProsperRating are the same as the original
+// data but LoanOriginalAmount will contain an array of all values.
+    
   var aggregatedData = dimple._rollUp(data, ["year", "BorrowerRate", "ProsperRating"], ["LoanOriginalAmount"]);
-  // This will generate a new array of data where year, BorrowerRate and ProsperRating are the same as the original
-  // data but LoanOriginalAmount will contain an array of all values.
   for (var i = 0; i < aggregatedData.length; i += 1) {
-    // Get the array of sales for the ith year, BorrowerRate and ProsperRating combination
     var vals = aggregatedData[i]["LoanOriginalAmount"];
-    // Sort them in ascending numerical order
     vals.sort(function (a, b) { return parseFloat(a) - parseFloat(b) });
     if (vals.length === 1) {
-      // If there is a single value use it for the new median column
       aggregatedData[i]["Median LoanOriginalAmount"] = parseFloat(vals[0]);
     } else if (vals.length % 2 === 0) {
-      // If there are an even number of values average the middle two (zero based array)
       aggregatedData[i]["Median LoanOriginalAmount"] = (parseFloat(vals[vals.length / 2 - 1]) + parseFloat(vals[vals.length / 2])) / 2;
     } else {
-      // Otherwise just return the middle value (zero based array)
       aggregatedData[i]["Median LoanOriginalAmount"] = parseFloat(vals[vals.length / 2 - 0.5]);
     }
   }
